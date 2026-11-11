@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ball Pistol Game - Accounts & Matchmaking</title>
+    <title>Ball Pistol Game - Persistent Login</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -339,7 +339,18 @@ document.addEventListener('webkitfullscreenchange', fitGameToScreen);
 window.addEventListener('resize', fitGameToScreen);
 fitGameToScreen();
 
-// Auth Logic
+// Check if user is already remembered in LocalStorage on page load
+window.addEventListener('DOMContentLoaded', () => {
+    const savedUser = localStorage.getItem('ball_pistol_user');
+    if (savedUser) {
+        loggedInUser = savedUser;
+        document.getElementById('auth-status').innerText = `Welcome back, ${loggedInUser}!`;
+        document.getElementById('auth-status').style.color = '#00ffcc';
+        document.getElementById('auth-panel').style.display = 'none';
+        document.getElementById('matchmaking-status').innerText = "Ready for Online Matchmaking";
+    }
+});
+
 function getAuthSocket() {
     if (!socket || socket.readyState !== WebSocket.OPEN) {
         socket = new WebSocket(document.getElementById('ws-url').value);
@@ -370,6 +381,9 @@ function handleAuthMessage(event) {
     const status = document.getElementById('auth-status');
     if (data.type === 'auth_success') {
         loggedInUser = data.username;
+        // Save user into browser storage so they are remembered next time
+        localStorage.setItem('ball_pistol_user', loggedInUser);
+
         status.innerText = `Logged in as: ${loggedInUser}`;
         status.style.color = '#00ffcc';
         document.getElementById('auth-panel').style.display = 'none';
@@ -479,11 +493,10 @@ function startMatch() {
         else if (selectedDifficulty === 'medium') { player2.speed = 5.5; player2.shootCooldown = 400; }
         else if (selectedDifficulty === 'hard') { player2.speed = 6.5; player2.shootCooldown = 180; }
     } else if (playMode === 'local') {
-        // Temporarily remove usernames inside local 2p mode as requested
         p1CustomName = "";
         p2CustomName = "";
     } else if (playMode === 'ws') {
-        // Online user names assigned from server
+        // Names come from server assignment
     }
 
     document.getElementById('p1-label').innerText = p1CustomName;
