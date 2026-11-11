@@ -5,6 +5,9 @@ const wss = new WebSocket.Server({ port: port });
 
 console.log(`WebSocket server running on port ${port}`);
 
+// Simple in-memory account database: { username: password }
+const accounts = {};
+
 let waitingPlayer = null;
 let rooms = [];
 
@@ -17,7 +20,28 @@ wss.on('connection', (ws) => {
             return;
         }
 
-        if (data.type === 'join') {
+        // Account Registration
+        if (data.type === 'register') {
+            if (accounts[data.username]) {
+                ws.send(JSON.stringify({ type: 'auth_error', message: 'Username already taken!' }));
+            } else if (!data.username || !data.password) {
+                ws.send(JSON.stringify({ type: 'auth_error', message: 'Fields cannot be blank!' }));
+            } else {
+                accounts[data.username] = data.password;
+                ws.send(JSON.stringify({ type: 'auth_success', username: data.username, message: 'Account created! Logged in.' }));
+            }
+        }
+        // Account Login
+        else if (data.type === 'login') {
+            if (accounts[data.username] && accounts[data.username] === data.password) {
+                ws.send(JSON.stringify({ type: 'auth_success', username: data.username, message: 'Logged in successfully!' }));
+            } else {
+                ws.send(JSON.stringify({ type: 'auth_error', message: 'Invalid username or password!' }));
+            }
+        }
+        // Matchmaking Join
+        else if (data.type === 'join') {
+            ws.username = data.username || 'Guest';
             if (waitingPlayer && waitingPlayer.readyState === WebSocket.OPEN) {
                 const room = { 
                     p1: waitingPlayer, 
@@ -29,8 +53,8 @@ wss.on('connection', (ws) => {
                 waitingPlayer.room = room;
                 ws.room = room;
 
-                waitingPlayer.send(JSON.stringify({ type: 'assign', role: 1, map: room.currentMap }));
-                ws.send(JSON.stringify({ type: 'assign', role: 2, map: room.currentMap }));
+                waitingPlayer.send(JSON.stringify({ type: 'assign', role: 1, map: room.currentMap, p1Name: waitingPlayer.username, p2Name: ws.username }));
+                ws.send(JSON.stringify({ type: 'assign', role: 2, map: room.currentMap, p1Name: waitingPlayer.username, p2Name: ws.username }));
 
                 waitingPlayer = null;
             } else {
