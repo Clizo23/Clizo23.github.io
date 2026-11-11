@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ball Pistol Game - First to 15</title>
+    <title>Ball Pistol Game - Accounts & Matchmaking</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -68,26 +68,32 @@
         #start-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 15, 23, 0.95);
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 10;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; z-index: 10;
         }
-        #start-screen h1 { font-size: 38px; letter-spacing: 3px; color: #00e5ff; text-shadow: 0 0 15px rgba(0, 229, 255, 0.6); }
-        .mode-options { display: flex; gap: 12px; }
-        .mode-btn, .diff-btn {
+        #start-screen h1 { font-size: 34px; letter-spacing: 3px; color: #00e5ff; text-shadow: 0 0 15px rgba(0, 229, 255, 0.6); }
+        .mode-options { display: flex; gap: 10px; }
+        .mode-btn, .diff-btn, .auth-btn {
             background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.2);
-            color: #fff; padding: 10px 16px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+            color: #fff; padding: 8px 14px; font-size: 13px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
         }
-        .mode-btn:hover, .mode-btn.selected, .diff-btn:hover, .diff-btn.selected {
-            background: rgba(0, 229, 255, 0.2); border-color: #00e5ff; box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+        .mode-btn:hover, .mode-btn.selected, .diff-btn:hover, .diff-btn.selected, .auth-btn:hover {
+            background: rgba(0, 229, 255, 0.2); border-color: #00e5ff; box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
         }
-        #bot-diff-container { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .auth-box {
+            display: flex; flex-direction: column; gap: 6px; align-items: center; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); width: 280px;
+        }
+        .auth-input {
+            width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.6); color: #fff; font-size: 13px; text-align: center;
+        }
+        #bot-diff-container { display: flex; flex-direction: column; align-items: center; gap: 6px; }
         #play-btn {
-            margin-top: 8px; background: #00e5ff; color: #0f0f17; border: none;
-            padding: 14px 48px; font-size: 20px; font-weight: bold; border-radius: 8px; cursor: pointer;
-            text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 0 20px rgba(0, 229, 255, 0.4); transition: all 0.2s ease;
+            margin-top: 4px; background: #00e5ff; color: #0f0f17; border: none;
+            padding: 12px 40px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 0 15px rgba(0, 229, 255, 0.4); transition: all 0.2s ease;
         }
         #play-btn:hover { background: #33ecff; transform: scale(1.05); }
-        #ws-container { display: none; flex-direction: column; gap: 8px; align-items: center; width: 300px; }
-        #ws-url { width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.5); color: #fff; text-align: center; }
+        #ws-container { display: none; flex-direction: column; gap: 6px; align-items: center; width: 300px; }
+        #ws-url { width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.5); color: #fff; text-align: center; font-size: 12px; }
         #fullscreen-btn {
             position: fixed; top: 12px; right: 12px; z-index: 1000; width: 40px; height: 40px;
             display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.55);
@@ -113,15 +119,27 @@
     
     <div id="start-screen">
         <h1 id="screen-title">BALL PISTOL DUEL</h1>
-        <div style="color: #aaa; font-size: 14px;" id="screen-subtitle">FIRST TO 15 WINS</div>
+        <div style="color: #aaa; font-size: 13px;" id="screen-subtitle">FIRST TO 15 WINS</div>
+
+        <!-- Account Authentication Box -->
+        <div class="auth-box" id="auth-panel">
+            <div style="font-size: 12px; color: #00e5ff; font-weight: bold;" id="auth-status">ACCOUNT LOGIN / REGISTER</div>
+            <input type="text" id="auth-user" class="auth-input" placeholder="Username">
+            <input type="password" id="auth-pass" class="auth-input" placeholder="Password">
+            <div style="display: flex; gap: 8px; width: 100%;">
+                <button class="auth-btn" style="flex: 1;" id="login-btn">Login</button>
+                <button class="auth-btn" style="flex: 1;" id="register-btn">Register</button>
+            </div>
+        </div>
+
         <div class="mode-options" id="main-menu-options">
             <button class="mode-btn selected" data-mode="bot">VS BOT</button>
-            <button class="mode-btn" data-mode="local">LOCAL 2P (SAME KEYBOARD)</button>
+            <button class="mode-btn" data-mode="local">LOCAL 2P</button>
             <button class="mode-btn" data-mode="ws">ONLINE MATCHMAKING</button>
         </div>
 
         <div id="bot-diff-container">
-            <div style="color: #aaa; font-size: 12px; margin-top: 4px;">BOT DIFFICULTY</div>
+            <div style="color: #aaa; font-size: 11px;">BOT DIFFICULTY</div>
             <div class="mode-options">
                 <button class="diff-btn selected" data-diff="easy">EASY</button>
                 <button class="diff-btn" data-diff="medium">MEDIUM</button>
@@ -131,7 +149,7 @@
 
         <div id="ws-container">
             <input type="text" id="ws-url" value="wss://ball-pistol-server.onrender.com" placeholder="wss://your-server.onrender.com">
-            <div style="font-size: 11px; color: #888;" id="matchmaking-status">Click Start to enter matchmaking queue</div>
+            <div style="font-size: 11px; color: #888;" id="matchmaking-status">Login required to play online</div>
         </div>
 
         <button id="play-btn">START MATCH</button>
@@ -203,6 +221,9 @@ let matchOver = false;
 let socket = null;
 let myRole = null;
 let currentMapId = 0;
+let loggedInUser = null;
+let p1CustomName = "PLAYER 1";
+let p2CustomName = "PLAYER 2";
 
 const ROUND_TIME_LIMIT = 240;
 let roundTimer = ROUND_TIME_LIMIT;
@@ -318,6 +339,47 @@ document.addEventListener('webkitfullscreenchange', fitGameToScreen);
 window.addEventListener('resize', fitGameToScreen);
 fitGameToScreen();
 
+// Auth Logic
+function getAuthSocket() {
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+        socket = new WebSocket(document.getElementById('ws-url').value);
+    }
+    return socket;
+}
+
+document.getElementById('register-btn').addEventListener('click', () => {
+    const u = document.getElementById('auth-user').value.trim();
+    const p = document.getElementById('auth-pass').value.trim();
+    const ws = getAuthSocket();
+    ws.onopen = () => ws.send(JSON.stringify({ type: 'register', username: u, password: p }));
+    if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'register', username: u, password: p }));
+    ws.onmessage = handleAuthMessage;
+});
+
+document.getElementById('login-btn').addEventListener('click', () => {
+    const u = document.getElementById('auth-user').value.trim();
+    const p = document.getElementById('auth-pass').value.trim();
+    const ws = getAuthSocket();
+    ws.onopen = () => ws.send(JSON.stringify({ type: 'login', username: u, password: p }));
+    if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'login', username: u, password: p }));
+    ws.onmessage = handleAuthMessage;
+});
+
+function handleAuthMessage(event) {
+    const data = JSON.parse(event.data);
+    const status = document.getElementById('auth-status');
+    if (data.type === 'auth_success') {
+        loggedInUser = data.username;
+        status.innerText = `Logged in as: ${loggedInUser}`;
+        status.style.color = '#00ffcc';
+        document.getElementById('auth-panel').style.display = 'none';
+        document.getElementById('matchmaking-status').innerText = "Ready for Online Matchmaking";
+    } else if (data.type === 'auth_error') {
+        status.innerText = data.message;
+        status.style.color = '#ff4757';
+    }
+}
+
 document.querySelectorAll('.mode-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
@@ -339,6 +401,10 @@ document.querySelectorAll('.diff-btn').forEach(btn => {
 document.getElementById('play-btn').addEventListener('click', () => {
     initAudio();
     if (playMode === 'ws') {
+        if (!loggedInUser) {
+            alert("Please log in or register an account before playing online!");
+            return;
+        }
         initMatchmaking();
     } else {
         currentMapId = Math.floor(Math.random() * 3);
@@ -349,21 +415,23 @@ document.getElementById('play-btn').addEventListener('click', () => {
 function initMatchmaking() {
     const url = document.getElementById('ws-url').value;
     const statusText = document.getElementById('matchmaking-status');
-    statusText.innerText = "Connecting to matchmaking server...";
+    statusText.innerText = "Connecting to queue...";
     
     try {
         socket = new WebSocket(url);
         socket.onopen = () => {
             statusText.innerText = "Searching for opponent...";
-            socket.send(JSON.stringify({ type: 'join' }));
+            socket.send(JSON.stringify({ type: 'join', username: loggedInUser }));
         };
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
             if (data.type === 'waiting') {
-                statusText.innerText = "Waiting for another player to join...";
+                statusText.innerText = "Waiting for another player...";
             } else if (data.type === 'assign') {
                 myRole = data.role;
                 currentMapId = data.map;
+                p1CustomName = data.p1Name;
+                p2CustomName = data.p2Name;
                 startMatch();
             } else if (data.type === 'new_round') {
                 currentMapId = data.map;
@@ -405,14 +473,21 @@ function startMatch() {
     p2Score = 0;
     
     if (playMode === 'bot') {
-        document.getElementById('p2-label').innerText = `BOT [${selectedDifficulty.toUpperCase()}]`;
+        p1CustomName = loggedInUser ? loggedInUser : "PLAYER 1";
+        p2CustomName = `BOT [${selectedDifficulty.toUpperCase()}]`;
         if (selectedDifficulty === 'easy') { player2.speed = 4; player2.shootCooldown = 800; }
         else if (selectedDifficulty === 'medium') { player2.speed = 5.5; player2.shootCooldown = 400; }
         else if (selectedDifficulty === 'hard') { player2.speed = 6.5; player2.shootCooldown = 180; }
+    } else if (playMode === 'local') {
+        // Temporarily remove usernames inside local 2p mode as requested
+        p1CustomName = "";
+        p2CustomName = "";
     } else if (playMode === 'ws') {
-        document.getElementById('p1-label').innerText = myRole === 1 ? "YOU (P1)" : "PLAYER 1";
-        document.getElementById('p2-label').innerText = myRole === 2 ? "YOU (P2)" : "PLAYER 2";
+        // Online user names assigned from server
     }
+
+    document.getElementById('p1-label').innerText = p1CustomName;
+    document.getElementById('p2-label').innerText = p2CustomName;
 
     gameRunning = true;
     resetRound();
@@ -600,7 +675,6 @@ function triggerDeath(winner) {
     if (winner === player1) p1Score++; else p2Score++;
     updateUI();
 
-    // Check First to 15 Win Condition
     if (p1Score >= 15 || p2Score >= 15) {
         const winningPlayerNum = p1Score >= 15 ? 1 : 2;
         if (playMode === 'ws') {
@@ -608,7 +682,7 @@ function triggerDeath(winner) {
                 socket.send(JSON.stringify({ type: 'match_over', winner: winningPlayerNum }));
             }
         }
-        showVictoryScreen(winningPlayerNum === 1 ? "PLAYER 1 WINS THE MATCH!" : "PLAYER 2 WINS THE MATCH!");
+        showVictoryScreen(winningPlayerNum === 1 ? `${p1CustomName} WINS THE MATCH!` : `${p2CustomName} WINS THE MATCH!`);
         return;
     }
     
