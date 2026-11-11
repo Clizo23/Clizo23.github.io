@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ball Pistol Game - Persistent Login</title>
+    <title>Ball Pistol Game - Accounts & Matchmaking</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -238,7 +238,8 @@ const player1 = {
 const player2 = {
     x: 750, y: 300, radius: 18, vx: 0, vy: 0, speed: 5,
     jumpForce: -12, fastFallSpeed: 16, gravity: 0.5, isGrounded: false,
-    color: '#ff0055', hp: 200, maxHp: 200, pistolLength: 24, pistolAngle: Math.PI, lastShoot: 0
+    color: '#ff0055', hp: 200, maxHp: 200, pistolLength: 24, pistolAngle: Math.PI, lastShoot: 0,
+    shootCooldown: 600
 };
 
 const bullets = [];
@@ -339,7 +340,6 @@ document.addEventListener('webkitfullscreenchange', fitGameToScreen);
 window.addEventListener('resize', fitGameToScreen);
 fitGameToScreen();
 
-// Check if user is already remembered in LocalStorage on page load
 window.addEventListener('DOMContentLoaded', () => {
     const savedUser = localStorage.getItem('ball_pistol_user');
     if (savedUser) {
@@ -381,9 +381,7 @@ function handleAuthMessage(event) {
     const status = document.getElementById('auth-status');
     if (data.type === 'auth_success') {
         loggedInUser = data.username;
-        // Save user into browser storage so they are remembered next time
         localStorage.setItem('ball_pistol_user', loggedInUser);
-
         status.innerText = `Logged in as: ${loggedInUser}`;
         status.style.color = '#00ffcc';
         document.getElementById('auth-panel').style.display = 'none';
@@ -480,6 +478,19 @@ function initMatchmaking() {
     }
 }
 
+function configureBotDifficulty() {
+    if (selectedDifficulty === 'easy') {
+        player2.speed = 3.5;
+        player2.shootCooldown = 850;
+    } else if (selectedDifficulty === 'medium') {
+        player2.speed = 5.2;
+        player2.shootCooldown = 420;
+    } else if (selectedDifficulty === 'hard') {
+        player2.speed = 6.8;
+        player2.shootCooldown = 200;
+    }
+}
+
 function startMatch() {
     document.getElementById('start-screen').style.display = 'none';
     matchOver = false;
@@ -489,14 +500,10 @@ function startMatch() {
     if (playMode === 'bot') {
         p1CustomName = loggedInUser ? loggedInUser : "PLAYER 1";
         p2CustomName = `BOT [${selectedDifficulty.toUpperCase()}]`;
-        if (selectedDifficulty === 'easy') { player2.speed = 4; player2.shootCooldown = 800; }
-        else if (selectedDifficulty === 'medium') { player2.speed = 5.5; player2.shootCooldown = 400; }
-        else if (selectedDifficulty === 'hard') { player2.speed = 6.5; player2.shootCooldown = 180; }
+        configureBotDifficulty();
     } else if (playMode === 'local') {
         p1CustomName = "";
         p2CustomName = "";
-    } else if (playMode === 'ws') {
-        // Names come from server assignment
     }
 
     document.getElementById('p1-label').innerText = p1CustomName;
@@ -674,6 +681,7 @@ function resetRound() {
     loadMap(currentMapId);
     player1.x = 150; player1.y = 200; player1.vx = 0; player1.vy = 0; player1.hp = player1.maxHp;
     player2.x = 750; player2.y = 200; player2.vx = 0; player2.vy = 0; player2.hp = player2.maxHp;
+    if (playMode === 'bot') configureBotDifficulty();
     bullets.length = 0; explosions.length = 0; geysers.length = 0; spikes.length = 0; particles.length = 0;
     roundTimer = ROUND_TIME_LIMIT;
     lastTimerTick = Date.now();
@@ -756,9 +764,7 @@ function handleInput() {
         const dy = mouse.y - player1.y;
         player1.pistolAngle = Math.atan2(dy, dx);
 
-        if (playMode === 'bot') {
-            updateBotAI();
-        } else if (playMode === 'local') {
+        if (playMode === 'local') {
             if (keys['arrowleft']) { player2.vx = -player2.speed; player2.pistolAngle = Math.PI; }
             else if (keys['arrowright']) { player2.vx = player2.speed; player2.pistolAngle = 0; }
             else player2.vx *= 0.85;
@@ -773,17 +779,25 @@ function updateBotAI() {
     const dx = player1.x - player2.x;
     const dy = player1.y - player2.y;
     player2.pistolAngle = Math.atan2(dy, dx);
-    if (Math.abs(dx) > 250) player2.vx = dx > 0 ? player2.speed : -player2.speed;
-    else if (Math.abs(dx) < 120) player2.vx = dx > 0 ? -player2.speed : player2.speed;
-    else player2.vx *= 0.8;
-
-    if (player2.isGrounded && (player1.y < player2.y - 60 || Math.random() < 0.02)) {
-        player2.vy = player2.jumpForce; player2.isGrounded = false;
+    
+    if (Math.abs(dx) > 250) {
+        player2.vx = dx > 0 ? player2.speed : -player2.speed;
+    } else if (Math.abs(dx) < 120) {
+        player2.vx = dx > 0 ? -player2.speed : player2.speed;
+    } else {
+        player2.vx *= 0.8;
     }
+
+    if (player2.isGrounded && (player1.y < player2.y - 60 || Math.random() < (selectedDifficulty === 'hard' ? 0.05 : 0.02))) {
+        player2.vy = player2.jumpForce; 
+        player2.isGrounded = false;
+    }
+
     const now = Date.now();
-    if (now - player2.lastShoot > player2.shootCooldown) {
+    const cd = player2.shootCooldown || 600;
+    if (now - player2.lastShoot > cd) {
         shoot(player2);
-        player2.lastShoot = now + Math.random() * 150;
+        player2.lastShoot = now + Math.random() * (selectedDifficulty === 'hard' ? 50 : 150);
     }
 }
 
