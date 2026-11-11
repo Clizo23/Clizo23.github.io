@@ -473,16 +473,19 @@ function triggerScreenShake(amount = 10) {
     shakeTime = amount;
 }
 
+// Randomize Map Platforms on each round reset or game start
 function generateRandomMap() {
     platforms = [];
+    // Always include floor
     platforms.push({ x: 0, y: canvas.height - 40, width: canvas.width, height: 40, type: 'floor' });
 
-    const numPlatforms = Math.floor(Math.random() * 3) + 3;
+    // Generate 3 to 5 random floating platforms
+    const numPlatforms = Math.floor(Math.random() * 3) + 3; // 3 to 5 platforms
     for (let i = 0; i < numPlatforms; i++) {
-        const pWidth = Math.floor(Math.random() * 80) + 100;
+        const pWidth = Math.floor(Math.random() * 80) + 100; // width between 100 and 180
         const pHeight = 18;
         const pX = Math.random() * (canvas.width - pWidth - 100) + 50;
-        const pY = Math.random() * 200 + 150;
+        const pY = Math.random() * 200 + 150; // between y=150 and y=350
         platforms.push({ x: pX, y: pY, width: pWidth, height: pHeight, type: 'platform' });
     }
 }
@@ -780,7 +783,7 @@ function createGeyser(x, y) {
 }
 
 function resetRound() {
-    generateRandomMap();
+    generateRandomMap(); // Randomize map layouts on each new round!
     
     player1.x = 150;
     player1.y = 200;
@@ -964,9 +967,12 @@ function applyPhysics(ent) {
 
     ent.isGrounded = false;
 
+    // Platform and floor collision check
     for (let p of platforms) {
+        // Check landing on top of platform
         if (ent.x + ent.radius > p.x && ent.x - ent.radius < p.x + p.width) {
             if (ent.vy >= 0 && ent.y + ent.radius >= p.y && ent.y + ent.radius <= p.y + p.height + 12) {
+                // Only snap to top if falling or standing close enough
                 if (ent.y - ent.radius < p.y) {
                     ent.y = p.y - ent.radius;
                     ent.vy = 0;
@@ -1061,6 +1067,7 @@ function update() {
 
         let hitSolid = (b.x <= 0 || b.x >= canvas.width || b.y <= 0 || b.y >= canvas.height);
 
+        // Check platform collisions for bullets
         if (!hitSolid) {
             for (let p of platforms) {
                 if (b.x >= p.x && b.x <= p.x + p.width && b.y >= p.y && b.y <= p.y + p.height) {
@@ -1178,6 +1185,7 @@ function draw() {
     ctx.fillStyle = '#0f0f17';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // Draw Platforms and Floor
     platforms.forEach(p => {
         if (p.type === 'floor') {
             ctx.fillStyle = '#2a2a3c';
@@ -1233,7 +1241,7 @@ function draw() {
     explosions.forEach(ex => {
         ctx.fillStyle = 'rgba(255, 100, 0, 0.4)';
         ctx.beginPath();
-        ctx.arc(ex.x, ex.y, ex.currentRadius, 0, Math.PI -> 2);
+        ctx.arc(ex.x, ex.y, ex.currentRadius, 0, Math.PI * 2);
         ctx.fill();
         ctx.strokeStyle = '#ffbe0b';
         ctx.stroke();
