@@ -17,18 +17,20 @@ wss.on('connection', (ws) => {
             return;
         }
 
-        // Matchmaking logic
         if (data.type === 'join') {
             if (waitingPlayer && waitingPlayer.readyState === WebSocket.OPEN) {
-                // Create a room with 2 players
-                const room = { p1: waitingPlayer, p2: ws };
+                const room = { 
+                    p1: waitingPlayer, 
+                    p2: ws, 
+                    currentMap: Math.floor(Math.random() * 3)
+                };
                 rooms.push(room);
 
                 waitingPlayer.room = room;
                 ws.room = room;
 
-                waitingPlayer.send(JSON.stringify({ type: 'assign', role: 1 }));
-                ws.send(JSON.stringify({ type: 'assign', role: 2 }));
+                waitingPlayer.send(JSON.stringify({ type: 'assign', role: 1, map: room.currentMap }));
+                ws.send(JSON.stringify({ type: 'assign', role: 2, map: room.currentMap }));
 
                 waitingPlayer = null;
             } else {
@@ -36,8 +38,22 @@ wss.on('connection', (ws) => {
                 ws.send(JSON.stringify({ type: 'waiting' }));
             }
         } 
-        // Gameplay synchronization
         else if (data.type === 'input' || data.type === 'action') {
+            if (ws.room) {
+                const opponent = ws.room.p1 === ws ? ws.room.p2 : ws.room.p1;
+                if (opponent && opponent.readyState === WebSocket.OPEN) {
+                    opponent.send(JSON.stringify(data));
+                }
+            }
+        }
+        else if (data.type === 'next_round') {
+            if (ws.room) {
+                ws.room.currentMap = Math.floor(Math.random() * 3);
+                ws.room.p1.send(JSON.stringify({ type: 'new_round', map: ws.room.currentMap }));
+                ws.room.p2.send(JSON.stringify({ type: 'new_round', map: ws.room.currentMap }));
+            }
+        }
+        else if (data.type === 'match_over') {
             if (ws.room) {
                 const opponent = ws.room.p1 === ws ? ws.room.p2 : ws.room.p1;
                 if (opponent && opponent.readyState === WebSocket.OPEN) {
@@ -48,9 +64,7 @@ wss.on('connection', (ws) => {
     });
 
     ws.on('close', () => {
-        if (waitingPlayer === ws) {
-            waitingPlayer = null;
-        }
+        if (waitingPlayer === ws) waitingPlayer = null;
         if (ws.room) {
             const opponent = ws.room.p1 === ws ? ws.room.p2 : ws.room.p1;
             if (opponent && opponent.readyState === WebSocket.OPEN) {
