@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ball Pistol Game - Multimode Arena</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             background-color: #1a1a24;
             color: #ffffff;
@@ -32,223 +28,77 @@
             color: #fff;
             text-align: center;
         }
-        canvas {
-            display: block;
-            background: #0f0f17;
-        }
+        canvas { display: block; background: #0f0f17; }
         #ui-layer {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            display: flex; flex-direction: column; justify-content: space-between;
             padding: 15px;
         }
         .hud-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 16px;
-            font-weight: bold;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-            width: 100%;
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 16px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.8); width: 100%;
         }
-        .hp-container {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            width: 240px;
-        }
+        .hp-container { display: flex; flex-direction: column; gap: 4px; width: 240px; }
         .hp-bar-bg {
-            width: 100%;
-            height: 16px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            width: 100%; height: 16px; background: rgba(255, 255, 255, 0.15);
+            border-radius: 8px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.3);
         }
-        .hp-bar-fill {
-            height: 100%;
-            width: 100%;
-            transition: width 0.1s ease;
-        }
+        .hp-bar-fill { height: 100%; width: 100%; transition: width 0.1s ease; }
         #p1-hp-fill { background: #3a86ff; }
         #p2-hp-fill { background: #ff0055; }
-        .match-center {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-        }
-        .score-board {
-            font-size: 24px;
-            letter-spacing: 2px;
-            background: rgba(0,0,0,0.4);
-            padding: 4px 18px;
-            border-radius: 6px;
-        }
-        .timer-display {
-            font-size: 20px;
-            color: #ffbe0b;
-        }
-        .hud-bottom {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-        }
+        .match-center { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .score-board { font-size: 24px; letter-spacing: 2px; background: rgba(0,0,0,0.4); padding: 4px 18px; border-radius: 6px; }
+        .timer-display { font-size: 20px; color: #ffbe0b; }
+        .hud-bottom { display: flex; justify-content: space-between; width: 100%; }
         .ability-card {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(4px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            padding: 8px 12px;
-            min-width: 170px;
+            background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(4px);
+            border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 8px 12px; min-width: 170px;
         }
         .ability-card.p1 { border-color: #3a86ff; }
         .ability-card.p2 { border-color: #ff0055; }
-        .ability-key {
-            font-size: 11px;
-            color: #aaa;
-            text-transform: uppercase;
-        }
-        .ability-name {
-            font-size: 15px;
-            font-weight: bold;
-            color: #fff;
-        }
-        .ability-status {
-            font-size: 11px;
-            color: #00e5ff;
-            margin-top: 2px;
-        }
+        .ability-key { font-size: 11px; color: #aaa; text-transform: uppercase; }
+        .ability-name { font-size: 15px; font-weight: bold; color: #fff; }
+        .ability-status { font-size: 11px; color: #00e5ff; margin-top: 2px; }
         .controls-hint {
-            position: absolute;
-            bottom: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.6);
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-size: 11px;
-            color: #ccc;
-            text-align: center;
+            position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.6); padding: 6px 14px; border-radius: 6px; font-size: 11px; color: #ccc; text-align: center;
         }
         #start-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 15, 23, 0.95);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            z-index: 10;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 10;
         }
-        #start-screen h1 {
-            font-size: 38px;
-            letter-spacing: 3px;
-            color: #00e5ff;
-            text-shadow: 0 0 15px rgba(0, 229, 255, 0.6);
-        }
-        .mode-options {
-            display: flex;
-            gap: 12px;
-        }
+        #start-screen h1 { font-size: 38px; letter-spacing: 3px; color: #00e5ff; text-shadow: 0 0 15px rgba(0, 229, 255, 0.6); }
+        .mode-options { display: flex; gap: 12px; }
         .mode-btn, .diff-btn {
-            background: rgba(255, 255, 255, 0.08);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            color: #fff;
-            padding: 10px 16px;
-            font-size: 14px;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.2);
+            color: #fff; padding: 10px 16px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
         }
         .mode-btn:hover, .mode-btn.selected, .diff-btn:hover, .diff-btn.selected {
-            background: rgba(0, 229, 255, 0.2);
-            border-color: #00e5ff;
-            box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+            background: rgba(0, 229, 255, 0.2); border-color: #00e5ff; box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
         }
-        #bot-diff-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
+        #bot-diff-container { display: flex; flex-direction: column; align-items: center; gap: 8px; }
         #play-btn {
-            margin-top: 8px;
-            background: #00e5ff;
-            color: #0f0f17;
-            border: none;
-            padding: 14px 48px;
-            font-size: 20px;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
-            transition: all 0.2s ease;
+            margin-top: 8px; background: #00e5ff; color: #0f0f17; border: none;
+            padding: 14px 48px; font-size: 20px; font-weight: bold; border-radius: 8px; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 0 20px rgba(0, 229, 255, 0.4); transition: all 0.2s ease;
         }
-        #play-btn:hover {
-            background: #33ecff;
-            transform: scale(1.05);
-        }
-        #ws-container {
-            display: none;
-            flex-direction: column;
-            gap: 8px;
-            align-items: center;
-            width: 300px;
-        }
-        #ws-url {
-            width: 100%;
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: 1px solid rgba(255,255,255,0.3);
-            background: rgba(0,0,0,0.5);
-            color: #fff;
-            text-align: center;
-        }
+        #play-btn:hover { background: #33ecff; transform: scale(1.05); }
+        #ws-container { display: none; flex-direction: column; gap: 8px; align-items: center; width: 300px; }
+        #ws-url { width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.5); color: #fff; text-align: center; }
         #fullscreen-btn {
-            position: fixed;
-            top: 12px;
-            right: 12px;
-            z-index: 1000;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0, 0, 0, 0.55);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            border-radius: 8px;
-            color: #fff;
-            cursor: pointer;
-            transition: background 0.15s ease, transform 0.15s ease;
+            position: fixed; top: 12px; right: 12px; z-index: 1000; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 8px; color: #fff; cursor: pointer;
         }
-        #fullscreen-btn:hover {
-            background: rgba(0, 229, 255, 0.3);
-            transform: scale(1.05);
-        }
-        #fullscreen-btn svg {
-            width: 20px;
-            height: 20px;
-        }
+        #fullscreen-btn:hover { background: rgba(0, 229, 255, 0.3); transform: scale(1.05); }
+        #fullscreen-btn svg { width: 20px; height: 20px; }
         #fullscreen-btn .icon-exit { display: none; }
         body.is-fullscreen #fullscreen-btn .icon-enter { display: none; }
         body.is-fullscreen #fullscreen-btn .icon-exit { display: block; }
-        body.is-fullscreen #game-container {
-            border-radius: 0;
-        }
+        body.is-fullscreen #game-container { border-radius: 0; }
     </style>
 </head>
 <body>
@@ -267,7 +117,7 @@
         <div class="mode-options">
             <button class="mode-btn selected" data-mode="bot">VS BOT</button>
             <button class="mode-btn" data-mode="local">LOCAL 2P (SAME KEYBOARD)</button>
-            <button class="mode-btn" data-mode="ws">ONLINE WEBSOCKET</button>
+            <button class="mode-btn" data-mode="ws">ONLINE MATCHMAKING</button>
         </div>
 
         <div id="bot-diff-container">
@@ -281,7 +131,7 @@
 
         <div id="ws-container">
             <input type="text" id="ws-url" value="wss://ball-pistol-server.onrender.com" placeholder="wss://your-server.onrender.com">
-            <div style="font-size: 11px; color: #888;">Connected to live Render WebSocket server</div>
+            <div style="font-size: 11px; color: #888;" id="matchmaking-status">Click Start to enter matchmaking queue</div>
         </div>
 
         <button id="play-btn">START MATCH</button>
@@ -302,7 +152,7 @@
             </div>
 
             <div class="hp-container" style="align-items: flex-end;">
-                <div id="p2-label">BOT [EASY]</div>
+                <div id="p2-label">PLAYER 2 (RED)</div>
                 <div class="hp-bar-bg"><div id="p2-hp-fill" class="hp-bar-fill"></div></div>
             </div>
         </div>
@@ -315,14 +165,14 @@
             </div>
 
             <div class="ability-card p2" id="p2-ability-card" style="text-align: right;">
-                <div class="ability-key" id="p2-ability-key">P2 [/] Cycle: [K]/[L]</div>
+                <div class="ability-key">P2 Ability</div>
                 <div class="ability-name" id="p2-ability-name">Dash</div>
                 <div class="ability-status" id="p2-ability-status">READY</div>
             </div>
         </div>
 
         <div class="controls-hint" id="controls-hint-text">
-            P1: A/D (Move) | W (Jump) | S (Fastfall) | Space/Click (Shoot) | Q (Ability) | F/G (Cycle)
+            A/D: Move | W: Jump | S: Fastfall | Space/Click: Shoot | Q: Ability | F/G: Cycle
         </div>
     </div>
 </div>
@@ -350,54 +200,22 @@ let selectedDifficulty = 'easy';
 let roundOver = false;
 
 let socket = null;
-let networkRoleId = null;
+let myRole = null; // 1 or 2
 
 const ROUND_TIME_LIMIT = 240;
 let roundTimer = ROUND_TIME_LIMIT;
 let lastTimerTick = Date.now();
 
 const player1 = {
-    id: 1,
-    x: 150,
-    y: 300,
-    radius: 18,
-    vx: 0,
-    vy: 0,
-    speed: 5,
-    jumpForce: -12,
-    fastFallSpeed: 16,
-    gravity: 0.5,
-    isGrounded: false,
-    color: '#3a86ff',
-    hp: 200,
-    maxHp: 200,
-    pistolLength: 24,
-    pistolAngle: 0,
-    lastShoot: 0
+    x: 150, y: 300, radius: 18, vx: 0, vy: 0, speed: 5,
+    jumpForce: -12, fastFallSpeed: 16, gravity: 0.5, isGrounded: false,
+    color: '#3a86ff', hp: 200, maxHp: 200, pistolLength: 24, pistolAngle: 0, lastShoot: 0
 };
 
 const player2 = {
-    id: 2,
-    x: 750,
-    y: 300,
-    radius: 18,
-    vx: 0,
-    vy: 0,
-    speed: 4,
-    jumpForce: -12,
-    fastFallSpeed: 16,
-    gravity: 0.5,
-    isGrounded: false,
-    color: '#ff0055',
-    hp: 200,
-    maxHp: 200,
-    pistolLength: 24,
-    pistolAngle: Math.PI,
-    lastShoot: 0,
-    shootCooldown: 800,
-    jumpTimer: 0,
-    abilityCooldown: 0,
-    dashCooldown: 0
+    x: 750, y: 300, radius: 18, vx: 0, vy: 0, speed: 5,
+    jumpForce: -12, fastFallSpeed: 16, gravity: 0.5, isGrounded: false,
+    color: '#ff0055', hp: 200, maxHp: 200, pistolLength: 24, pistolAngle: Math.PI, lastShoot: 0
 };
 
 const bullets = [];
@@ -409,14 +227,9 @@ let platforms = [];
 let shakeTime = 0;
 
 let audioCtx = null;
-
 function initAudio() {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-    }
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
 }
 
 function playSound(type) {
@@ -425,7 +238,6 @@ function playSound(type) {
     const gain = audioCtx.createGain();
     osc.connect(gain);
     gain.connect(audioCtx.destination);
-
     const now = audioCtx.currentTime;
     if (type === 'shoot') {
         osc.type = 'triangle';
@@ -433,50 +245,38 @@ function playSound(type) {
         osc.frequency.exponentialRampToValueAtTime(110, now + 0.1);
         gain.gain.setValueAtTime(0.15, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-        osc.start(now);
-        osc.stop(now + 0.1);
+        osc.start(now); osc.stop(now + 0.1);
     } else if (type === 'hit') {
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(150, now);
         osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
         gain.gain.setValueAtTime(0.2, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-        osc.start(now);
-        osc.stop(now + 0.15);
+        osc.start(now); osc.stop(now + 0.15);
     } else if (type === 'explosion') {
         osc.type = 'square';
         osc.frequency.setValueAtTime(80, now);
         osc.frequency.exponentialRampToValueAtTime(20, now + 0.3);
         gain.gain.setValueAtTime(0.3, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-        osc.start(now);
-        osc.stop(now + 0.3);
+        osc.start(now); osc.stop(now + 0.3);
     }
 }
 
 function createParticles(x, y, color, count = 8) {
     for (let i = 0; i < count; i++) {
         particles.push({
-            x: x,
-            y: y,
-            vx: (Math.random() - 0.5) * 8,
-            vy: (Math.random() - 0.5) * 8,
-            radius: Math.random() * 3 + 2,
-            color: color,
-            alpha: 1,
-            life: 20
+            x, y, vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8,
+            radius: Math.random() * 3 + 2, color, alpha: 1, life: 20
         });
     }
 }
 
-function triggerScreenShake(amount = 10) {
-    shakeTime = amount;
-}
+function triggerScreenShake(amount = 10) { shakeTime = amount; }
 
 function generateRandomMap() {
     platforms = [];
     platforms.push({ x: 0, y: canvas.height - 40, width: canvas.width, height: 40, type: 'floor' });
-
     const numPlatforms = Math.floor(Math.random() * 3) + 3;
     for (let i = 0; i < numPlatforms; i++) {
         const pWidth = Math.floor(Math.random() * 80) + 100;
@@ -490,33 +290,18 @@ function generateRandomMap() {
 const gameContainer = document.getElementById('game-container');
 const fullscreenBtn = document.getElementById('fullscreen-btn');
 
-function isFullscreen() {
-    return !!(document.fullscreenElement || document.webkitFullscreenElement);
-}
-
+function isFullscreen() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
 function fitGameToScreen() {
     const fs = isFullscreen();
     document.body.classList.toggle('is-fullscreen', fs);
     const margin = fs ? 0 : 20;
-    const scale = Math.min(
-        (window.innerWidth - margin) / canvas.width,
-        (window.innerHeight - margin) / canvas.height
-    );
-    const finalScale = fs ? scale : Math.min(1, scale);
-    gameContainer.style.transform = `scale(${finalScale})`;
+    const scale = Math.min((window.innerWidth - margin) / canvas.width, (window.innerHeight - margin) / canvas.height);
+    gameContainer.style.transform = `scale(${fs ? scale : Math.min(1, scale)})`;
 }
 
 fullscreenBtn.addEventListener('click', () => {
-    if (isFullscreen()) {
-        (document.exitFullscreen || document.webkitExitFullscreen).call(document);
-    } else {
-        const el = document.documentElement;
-        const req = el.requestFullscreen || el.webkitRequestFullscreen;
-        if (req) {
-            const result = req.call(el);
-            if (result && result.catch) result.catch(() => {});
-        }
-    }
+    if (isFullscreen()) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); }
+    else { const req = document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen; if (req) req.call(document.documentElement); }
     fullscreenBtn.blur();
 });
 
@@ -530,7 +315,6 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
         e.target.classList.add('selected');
         playMode = e.target.getAttribute('data-mode');
-        
         document.getElementById('bot-diff-container').style.display = playMode === 'bot' ? 'flex' : 'none';
         document.getElementById('ws-container').style.display = playMode === 'ws' ? 'flex' : 'none';
     });
@@ -547,34 +331,59 @@ document.querySelectorAll('.diff-btn').forEach(btn => {
 document.getElementById('play-btn').addEventListener('click', () => {
     initAudio();
     if (playMode === 'ws') {
-        initWebSocket();
+        initMatchmaking();
     } else {
         startMatch();
     }
 });
 
-function initWebSocket() {
+function initMatchmaking() {
     const url = document.getElementById('ws-url').value;
+    const statusText = document.getElementById('matchmaking-status');
+    statusText.innerText = "Connecting to matchmaking server...";
+    
     try {
         socket = new WebSocket(url);
-        socket.onopen = () => { startMatch(); };
+        socket.onopen = () => {
+            statusText.innerText = "Searching for opponent...";
+            socket.send(JSON.stringify({ type: 'join' }));
+        };
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            if (data.type === 'init') {
-                networkRoleId = data.roleId;
-            } else if (data.type === 'gameState') {
-                syncGameState(data.state);
+            if (data.type === 'waiting') {
+                statusText.innerText = "Waiting for another player to join...";
+            } else if (data.type === 'assign') {
+                myRole = data.role; // 1 or 2
+                startMatch();
+            } else if (data.type === 'input') {
+                // Sync remote player state
+                const remote = myRole === 1 ? player2 : player1;
+                remote.x = data.x;
+                remote.y = data.y;
+                remote.vx = data.vx;
+                remote.vy = data.vy;
+                remote.pistolAngle = data.angle;
+                remote.hp = data.hp;
+            } else if (data.type === 'action') {
+                if (data.action === 'shoot') {
+                    const remote = myRole === 1 ? player2 : player1;
+                    spawnBullet(remote, data.angle, data.bType);
+                } else if (data.action === 'ability') {
+                    const remote = myRole === 1 ? player2 : player1;
+                    activateAbility(remote, data.abilityName);
+                }
+            } else if (data.type === 'opponent_disconnected') {
+                alert("Opponent disconnected!");
+                location.reload();
             }
         };
         socket.onerror = () => {
-            alert("WebSocket connection failed! Starting Local Bot Mode instead.");
+            alert("Matchmaking connection failed! Falling back to Bot Mode.");
             playMode = 'bot';
             startMatch();
         };
     } catch (e) {
-        alert("Invalid WebSocket URL. Falling back to VS Bot.");
-        playMode = 'bot';
-        startMatch();
+        alert("Invalid WebSocket URL.");
     }
 }
 
@@ -583,22 +392,12 @@ function startMatch() {
     
     if (playMode === 'bot') {
         document.getElementById('p2-label').innerText = `BOT [${selectedDifficulty.toUpperCase()}]`;
-        document.getElementById('controls-hint-text').innerHTML = `P1: A/D (Move) | W (Jump) | S (Fastfall) | Space/Click (Shoot) | Q (Ability) | F/G (Cycle)`;
-        document.getElementById('p2-ability-card').style.display = 'none';
-
         if (selectedDifficulty === 'easy') { player2.speed = 4; player2.shootCooldown = 800; }
         else if (selectedDifficulty === 'medium') { player2.speed = 5.5; player2.shootCooldown = 400; }
         else if (selectedDifficulty === 'hard') { player2.speed = 6.5; player2.shootCooldown = 180; }
-    } else {
-        document.getElementById('p2-label').innerText = `PLAYER 2 (RED)`;
-        document.getElementById('p2-ability-card').style.display = 'block';
-        player2.speed = 5;
-
-        if (playMode === 'local') {
-            document.getElementById('controls-hint-text').innerHTML = `P1: WASD + Space/Q/F/G | P2: Arrows + Right-Shift / K/L / /`;
-        } else {
-            document.getElementById('controls-hint-text').innerHTML = `ONLINE DUEL | P1 / P2 WebSockets Sync active`;
-        }
+    } else if (playMode === 'ws') {
+        document.getElementById('p1-label').innerText = myRole === 1 ? "YOU (P1)" : "PLAYER 1";
+        document.getElementById('p2-label').innerText = myRole === 2 ? "YOU (P2)" : "PLAYER 2";
     }
 
     gameRunning = true;
@@ -612,41 +411,42 @@ window.addEventListener('keydown', (e) => {
     const key = e.key.toLowerCase();
     keys[key] = true;
 
+    const me = (playMode === 'ws' && myRole === 2) ? player2 : player1;
+    const myCdMap = (me === player1) ? p1Cooldowns : p2Cooldowns;
+    const myAbilityIdx = (me === player1) ? p1AbilityIdx : p2AbilityIdx;
+
     if (key === 'f') {
-        p1AbilityIdx = (p1AbilityIdx - 1 + abilities.length) % abilities.length;
+        if (me === player1) p1AbilityIdx = (p1AbilityIdx - 1 + abilities.length) % abilities.length;
         updateUI();
     }
     if (key === 'g') {
-        p1AbilityIdx = (p1AbilityIdx + 1) % abilities.length;
+        if (me === player1) p1AbilityIdx = (p1AbilityIdx + 1) % abilities.length;
         updateUI();
     }
-    if (key === 'q') activateAbility(player1, abilities[p1AbilityIdx], p1Cooldowns);
+    if (key === 'q') {
+        const abName = abilities[myAbilityIdx];
+        activateAbility(me, abName);
+        if (socket && socket.readyState === WebSocket.OPEN && playMode === 'ws') {
+            socket.send(JSON.stringify({ type: 'action', action: 'ability', abilityName: abName }));
+        }
+    }
 
-    if (key === ' ' && Date.now() - player1.lastShoot > 180) {
-        shoot(player1);
-        player1.lastShoot = Date.now();
+    if (key === ' ' && Date.now() - me.lastShoot > 180) {
+        shoot(me);
+        me.lastShoot = Date.now();
     }
 
     if (playMode === 'local') {
-        if (key === 'k') {
-            p2AbilityIdx = (p2AbilityIdx - 1 + abilities.length) % abilities.length;
-            updateUI();
-        }
-        if (key === 'l') {
-            p2AbilityIdx = (p2AbilityIdx + 1) % abilities.length;
-            updateUI();
-        }
-        if (key === '/') activateAbility(player2, abilities[p2AbilityIdx], p2Cooldowns);
+        if (key === 'k') { p2AbilityIdx = (p2AbilityIdx - 1 + abilities.length) % abilities.length; updateUI(); }
+        if (key === 'l') { p2AbilityIdx = (p2AbilityIdx + 1 + abilities.length) % abilities.length; updateUI(); }
+        if (key === '/') activateAbility(player2, abilities[p2AbilityIdx]);
         if ((key === 'shift' || e.code === 'ShiftRight') && Date.now() - player2.lastShoot > 180) {
-            shoot(player2);
-            player2.lastShoot = Date.now();
+            shoot(player2); player2.lastShoot = Date.now();
         }
     }
 });
 
-window.addEventListener('keyup', (e) => {
-    keys[e.key.toLowerCase()] = false;
-});
+window.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
 
 canvas.addEventListener('mousemove', (e) => {
     const rect = canvas.getBoundingClientRect();
@@ -656,9 +456,10 @@ canvas.addEventListener('mousemove', (e) => {
 
 canvas.addEventListener('mousedown', () => {
     if (!gameRunning || roundOver) return;
-    if (Date.now() - player1.lastShoot > 180) {
-        shoot(player1);
-        player1.lastShoot = Date.now();
+    const me = (playMode === 'ws' && myRole === 2) ? player2 : player1;
+    if (Date.now() - me.lastShoot > 180) {
+        shoot(me);
+        me.lastShoot = Date.now();
     }
 });
 
@@ -680,11 +481,6 @@ function updateUI() {
     const p1Cd = p1Cooldowns[p1Ability] - Date.now();
     document.getElementById('p1-ability-status').innerText = p1Cd <= 0 ? "READY" : `${(p1Cd/1000).toFixed(1)}s`;
 
-    const p2Ability = abilities[p2AbilityIdx];
-    document.getElementById('p2-ability-name').innerText = p2Ability;
-    const p2Cd = p2Cooldowns[p2Ability] - Date.now();
-    document.getElementById('p2-ability-status').innerText = p2Cd <= 0 ? "READY" : `${(p2Cd/1000).toFixed(1)}s`;
-
     document.getElementById('p1-hp-fill').style.width = `${Math.max(0, (player1.hp / player1.maxHp) * 100)}%`;
     document.getElementById('p2-hp-fill').style.width = `${Math.max(0, (player2.hp / player2.maxHp) * 100)}%`;
     document.getElementById('p1-score').innerText = p1Score;
@@ -695,27 +491,23 @@ function updateUI() {
     document.getElementById('round-timer').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 }
 
-function activateAbility(ent, abilityName, cooldownMap) {
+function activateAbility(ent, abilityName) {
+    const cooldownMap = (ent === player1) ? p1Cooldowns : p2Cooldowns;
     const now = Date.now();
     if (now < cooldownMap[abilityName]) return;
 
     if (abilityName === "Dash") {
-        const angle = ent.pistolAngle;
-        ent.vx = Math.cos(angle) * 18;
-        ent.vy = Math.sin(angle) * 18;
+        ent.vx = Math.cos(ent.pistolAngle) * 18;
+        ent.vy = Math.sin(ent.pistolAngle) * 18;
         createParticles(ent.x, ent.y, ent.color, 12);
     } else if (abilityName === "Super Jump") {
         ent.vy = -18;
         createParticles(ent.x, ent.y, '#ffffff', 10);
     } else if (abilityName === "Triple Shot") {
-        for (let offset = -0.2; offset <= 0.2; offset += 0.2) {
-            spawnBullet(ent, ent.pistolAngle + offset);
-        }
+        for (let offset = -0.2; offset <= 0.2; offset += 0.2) spawnBullet(ent, ent.pistolAngle + offset, 'normal');
     } else if (abilityName === "Burst Shot") {
         for (let i = 0; i < 4; i++) {
-            setTimeout(() => {
-                if (gameRunning && !roundOver) spawnBullet(ent, ent.pistolAngle);
-            }, i * 90);
+            setTimeout(() => { if (gameRunning && !roundOver) spawnBullet(ent, ent.pistolAngle, 'normal'); }, i * 90);
         }
     } else if (abilityName === "Explosive Shot") {
         spawnBullet(ent, ent.pistolAngle, 'explosive');
@@ -723,14 +515,7 @@ function activateAbility(ent, abilityName, cooldownMap) {
         spawnBullet(ent, ent.pistolAngle, 'geyser');
     } else if (abilityName === "Spike Summon") {
         const target = ent === player1 ? player2 : player1;
-        spikes.push({
-            x: target.x + (Math.random() * 60 - 30),
-            y: canvas.height - 40,
-            width: 40,
-            height: 30,
-            duration: 300,
-            owner: ent
-        });
+        spikes.push({ x: target.x + (Math.random() * 60 - 30), y: canvas.height - 40, width: 40, height: 30, duration: 300, owner: ent });
         createParticles(target.x, canvas.height - 40, '#ff4757', 15);
     } else if (abilityName === "Shield") {
         ent.hp = Math.min(ent.maxHp, ent.hp + 50);
@@ -744,20 +529,23 @@ function activateAbility(ent, abilityName, cooldownMap) {
 function spawnBullet(owner, angle, type = 'normal') {
     playSound('shoot');
     bullets.push({
-        owner: owner,
-        type: type,
+        owner, type,
         x: owner.x + Math.cos(angle) * owner.pistolLength,
         y: owner.y + Math.sin(angle) * owner.pistolLength,
-        vx: Math.cos(angle) * 13,
-        vy: Math.sin(angle) * 13,
+        vx: Math.cos(angle) * 13, vy: Math.sin(angle) * 13,
         radius: type === 'explosive' ? 6 : (type === 'geyser' ? 7 : 4),
         color: type === 'geyser' ? '#00ffff' : (type === 'explosive' ? '#ff9f43' : owner.color)
     });
+
+    if (socket && socket.readyState === WebSocket.OPEN && playMode === 'ws') {
+        const me = (myRole === 2) ? player2 : player1;
+        if (owner === me) {
+            socket.send(JSON.stringify({ type: 'action', action: 'shoot', angle, bType: type }));
+        }
+    }
 }
 
-function shoot(owner) {
-    spawnBullet(owner, owner.pistolAngle, 'normal');
-}
+function shoot(owner) { spawnBullet(owner, owner.pistolAngle, 'normal'); }
 
 function createExplosion(x, y, radius, damage) {
     playSound('explosion');
@@ -768,38 +556,15 @@ function createExplosion(x, y, radius, damage) {
 
 function createGeyser(x, y) {
     triggerScreenShake(6);
-    geysers.push({
-        x: x,
-        y: canvas.height - 40,
-        width: 110,
-        height: 35,
-        duration: 900,
-        used: false
-    });
+    geysers.push({ x, y: canvas.height - 40, width: 110, height: 35, duration: 900, used: false });
     createParticles(x, canvas.height - 40, '#00e5ff', 16);
 }
 
 function resetRound() {
     generateRandomMap();
-    
-    player1.x = 150;
-    player1.y = 200;
-    player1.vx = 0;
-    player1.vy = 0;
-    player1.hp = player1.maxHp;
-
-    player2.x = 750;
-    player2.y = 200;
-    player2.vx = 0;
-    player2.vy = 0;
-    player2.hp = player2.maxHp;
-
-    bullets.length = 0;
-    explosions.length = 0;
-    geysers.length = 0;
-    spikes.length = 0;
-    particles.length = 0;
-
+    player1.x = 150; player1.y = 200; player1.vx = 0; player1.vy = 0; player1.hp = player1.maxHp;
+    player2.x = 750; player2.y = 200; player2.vx = 0; player2.vy = 0; player2.hp = player2.maxHp;
+    bullets.length = 0; explosions.length = 0; geysers.length = 0; spikes.length = 0; particles.length = 0;
     roundTimer = ROUND_TIME_LIMIT;
     lastTimerTick = Date.now();
     roundOver = false;
@@ -809,14 +574,9 @@ function resetRound() {
 function triggerDeath(winner) {
     if (roundOver) return;
     roundOver = true;
-    
-    if (winner === player1) p1Score++;
-    else p2Score++;
-    
+    if (winner === player1) p1Score++; else p2Score++;
     updateUI();
-    setTimeout(() => {
-        resetRound();
-    }, 1200);
+    setTimeout(() => { resetRound(); }, 1200);
 }
 
 function updateRoundTimer() {
@@ -825,135 +585,77 @@ function updateRoundTimer() {
     if (now - lastTimerTick >= 1000) {
         roundTimer--;
         lastTimerTick = now;
-        
         if (roundTimer <= 0) {
-            if (player1.hp > player2.hp) triggerDeath(player1);
-            else triggerDeath(player2);
+            if (player1.hp > player2.hp) triggerDeath(player1); else triggerDeath(player2);
         }
         updateUI();
-    }
-}
-
-function updateBotAI() {
-    if (roundOver) return;
-    if (player2.abilityCooldown > 0) player2.abilityCooldown--;
-    if (player2.dashCooldown > 0) player2.dashCooldown--;
-
-    const dx = player1.x - player2.x;
-    const dy = player1.y - player2.y;
-    const dist = Math.hypot(dx, dy);
-
-    if (selectedDifficulty === 'easy') {
-        player2.pistolAngle = Math.atan2(dy, dx);
-        
-        if (Math.abs(dx) > 250) player2.vx = dx > 0 ? player2.speed : -player2.speed;
-        else if (Math.abs(dx) < 120) player2.vx = dx > 0 ? -player2.speed : player2.speed;
-        else player2.vx *= 0.8;
-
-        player2.jumpTimer++;
-        if (player2.isGrounded && (player1.y < player2.y - 60 || (player2.jumpTimer > 120 && Math.random() < 0.02))) {
-            player2.vy = player2.jumpForce;
-            player2.isGrounded = false;
-            player2.jumpTimer = 0;
-        }
-
-        if (player2.dashCooldown <= 0 && (dist > 300 || dist < 100) && Math.random() < 0.03) {
-            activateAbility(player2, "Dash", p2Cooldowns);
-            player2.dashCooldown = 300;
-        }
-    } else {
-        const bulletSpeed = 13;
-        const timeToHit = dist / bulletSpeed;
-        const predictedX = player1.x + player1.vx * timeToHit * (selectedDifficulty === 'hard' ? 1.0 : 0.5);
-        const predictedY = player1.y + player1.vy * timeToHit * (selectedDifficulty === 'hard' ? 1.0 : 0.5);
-        player2.pistolAngle = Math.atan2(predictedY - player2.y, predictedX - player2.x);
-
-        let incomingDanger = false;
-        for (let b of bullets) {
-            if (b.owner === player1) {
-                const bDist = Math.hypot(b.x - player2.x, b.y - player2.y);
-                if (bDist < 160) {
-                    incomingDanger = true;
-                    if (player2.isGrounded && Math.random() < 0.8) {
-                        player2.vy = player2.jumpForce;
-                        player2.isGrounded = false;
-                    } else if (!player2.isGrounded && Math.random() < 0.6) {
-                        player2.vy = player2.fastFallSpeed;
-                    }
-                    break;
-                }
-            }
-        }
-
-        if (!incomingDanger) {
-            const desiredDist = selectedDifficulty === 'hard' ? 200 : 280;
-            if (Math.abs(dx) > desiredDist + 40) {
-                player2.vx = dx > 0 ? player2.speed : -player2.speed;
-            } else if (Math.abs(dx) < desiredDist - 40) {
-                player2.vx = dx > 0 ? -player2.speed : player2.speed;
-            } else {
-                if (Math.random() < 0.05) player2.vx = (Math.random() > 0.5 ? 1 : -1) * player2.speed;
-            }
-
-            if (player2.isGrounded && (player1.y < player2.y - 40 || Math.random() < 0.03)) {
-                player2.vy = player2.jumpForce;
-                player2.isGrounded = false;
-            }
-        }
-
-        if (player2.abilityCooldown <= 0) {
-            if (player2.hp < 90 && Math.random() < 0.7) {
-                activateAbility(player2, "Shield", p2Cooldowns);
-                player2.abilityCooldown = 180;
-            } else if (dist < 180 && Math.random() < 0.5) {
-                activateAbility(player2, "Burst Shot", p2Cooldowns);
-                player2.abilityCooldown = 150;
-            } else if (Math.abs(dx) > 200 && Math.random() < 0.6) {
-                activateAbility(player2, "Spike Summon", p2Cooldowns);
-                player2.abilityCooldown = 200;
-            }
-        }
-    }
-
-    const now = Date.now();
-    if (now - player2.lastShoot > player2.shootCooldown) {
-        shoot(player2);
-        const variance = selectedDifficulty === 'hard' ? 30 : 150;
-        player2.lastShoot = now + (Math.random() * variance - (variance / 2));
     }
 }
 
 function handleInput() {
     if (roundOver) return;
 
-    if (keys['a']) player1.vx = -player1.speed;
-    else if (keys['d']) player1.vx = player1.speed;
-    else player1.vx *= 0.85;
+    if (playMode === 'ws') {
+        const me = (myRole === 2) ? player2 : player1;
+        if (keys['a']) me.vx = -me.speed;
+        else if (keys['d']) me.vx = me.speed;
+        else me.vx *= 0.85;
 
-    if (keys['w'] && player1.isGrounded) {
-        player1.vy = player1.jumpForce;
-        player1.isGrounded = false;
-    }
-    if (keys['s'] && !player1.isGrounded) {
-        player1.vy = player1.fastFallSpeed;
-    }
+        if (keys['w'] && me.isGrounded) { me.vy = me.jumpForce; me.isGrounded = false; }
+        if (keys['s'] && !me.isGrounded) me.vy = me.fastFallSpeed;
 
-    const dx = mouse.x - player1.x;
-    const dy = mouse.y - player1.y;
-    player1.pistolAngle = Math.atan2(dy, dx);
+        const dx = mouse.x - me.x;
+        const dy = mouse.y - me.y;
+        me.pistolAngle = Math.atan2(dy, dx);
 
-    if (playMode === 'local') {
-        if (keys['arrowleft']) { player2.vx = -player2.speed; player2.pistolAngle = Math.PI; }
-        else if (keys['arrowright']) { player2.vx = player2.speed; player2.pistolAngle = 0; }
-        else player2.vx *= 0.85;
-
-        if (keys['arrowup'] && player2.isGrounded) {
-            player2.vy = player2.jumpForce;
-            player2.isGrounded = false;
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                type: 'input',
+                x: me.x, y: me.y, vx: me.vx, vy: me.vy, angle: me.pistolAngle, hp: me.hp
+            }));
         }
-        if (keys['arrowdown'] && !player2.isGrounded) {
-            player2.vy = player2.fastFallSpeed;
+    } else {
+        // Local/Bot input handling
+        if (keys['a']) player1.vx = -player1.speed;
+        else if (keys['d']) player1.vx = player1.speed;
+        else player1.vx *= 0.85;
+
+        if (keys['w'] && player1.isGrounded) { player1.vy = player1.jumpForce; player1.isGrounded = false; }
+        if (keys['s'] && !player1.isGrounded) player1.vy = player1.fastFallSpeed;
+
+        const dx = mouse.x - player1.x;
+        const dy = mouse.y - player1.y;
+        player1.pistolAngle = Math.atan2(dy, dx);
+
+        if (playMode === 'bot') {
+            updateBotAI();
+        } else if (playMode === 'local') {
+            if (keys['arrowleft']) { player2.vx = -player2.speed; player2.pistolAngle = Math.PI; }
+            else if (keys['arrowright']) { player2.vx = player2.speed; player2.pistolAngle = 0; }
+            else player2.vx *= 0.85;
+            if (keys['arrowup'] && player2.isGrounded) { player2.vy = player2.jumpForce; player2.isGrounded = false; }
+            if (keys['arrowdown'] && !player2.isGrounded) player2.vy = player2.fastFallSpeed;
         }
+    }
+}
+
+function updateBotAI() {
+    if (roundOver) return;
+    const dx = player1.x - player2.x;
+    const dy = player1.y - player2.y;
+    const dist = Math.hypot(dx, dy);
+    player2.pistolAngle = Math.atan2(dy, dx);
+    if (Math.abs(dx) > 250) player2.vx = dx > 0 ? player2.speed : -player2.speed;
+    else if (Math.abs(dx) < 120) player2.vx = dx > 0 ? -player2.speed : player2.speed;
+    else player2.vx *= 0.8;
+
+    if (player2.isGrounded && (player1.y < player2.y - 60 || Math.random() < 0.02)) {
+        player2.vy = player2.jumpForce; player2.isGrounded = false;
+    }
+    const now = Date.now();
+    if (now - player2.lastShoot > player2.shootCooldown) {
+        shoot(player2);
+        player2.lastShoot = now + Math.random() * 150;
     }
 }
 
@@ -961,7 +663,6 @@ function applyPhysics(ent) {
     ent.vy += ent.gravity;
     ent.x += ent.vx;
     ent.y += ent.vy;
-
     ent.isGrounded = false;
 
     for (let p of platforms) {
@@ -975,268 +676,87 @@ function applyPhysics(ent) {
             }
         }
     }
-
     if (ent.x - ent.radius < 0) ent.x = ent.radius;
     if (ent.x + ent.radius > canvas.width) ent.x = canvas.width - ent.radius;
 }
 
-function broadcastState() {
-    if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({
-            type: 'gameState',
-            state: {
-                p1: { x: player1.x, y: player1.y, hp: player1.hp, angle: player1.pistolAngle },
-                p2: { x: player2.x, y: player2.y, hp: player2.hp, angle: player2.pistolAngle }
-            }
-        }));
-    }
-}
-
-function syncGameState(state) {
-    if (networkRoleId === 2) {
-        player1.x = state.p1.x;
-        player1.y = state.p1.y;
-        player1.hp = state.p1.hp;
-        player1.pistolAngle = state.p1.angle;
-    } else if (networkRoleId === 1) {
-        player2.x = state.p2.x;
-        player2.y = state.p2.y;
-        player2.hp = state.p2.hp;
-        player2.pistolAngle = state.p2.angle;
-    }
-    updateUI();
-}
-
 function update() {
     if (!gameRunning) return;
-
     updateRoundTimer();
     handleInput();
     applyPhysics(player1);
-
-    if (playMode === 'bot') {
-        updateBotAI();
-    }
+    if (playMode === 'bot') updateBotAI();
     applyPhysics(player2);
-
-    if (playMode === 'ws') broadcastState();
 
     for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.life--;
-        p.alpha = p.life / 20;
+        p.x += p.vx; p.y += p.vy; p.life--; p.alpha = p.life / 20;
         if (p.life <= 0) particles.splice(i, 1);
     }
-
     if (shakeTime > 0) shakeTime--;
-
-    for (let i = spikes.length - 1; i >= 0; i--) {
-        const s = spikes[i];
-        s.duration--;
-
-        const target = s.owner === player1 ? player2 : player1;
-        if (target.x + target.radius > s.x - s.width / 2 &&
-            target.x - target.radius < s.x + s.width / 2 &&
-            target.y + target.radius >= canvas.height - 40 - s.height) {
-            playSound('hit');
-            target.hp -= 20;
-            createParticles(target.x, target.y, '#ff4757', 10);
-            spikes.splice(i, 1);
-            updateUI();
-            if (target.hp <= 0) {
-                triggerDeath(s.owner === player1 ? player2 : player1);
-            }
-            continue;
-        }
-
-        if (s.duration <= 0) spikes.splice(i, 1);
-    }
 
     for (let i = bullets.length - 1; i >= 0; i--) {
         const b = bullets[i];
-        b.x += b.vx;
-        b.y += b.vy;
-
+        b.x += b.vx; b.y += b.vy;
         let hitSolid = (b.x <= 0 || b.x >= canvas.width || b.y <= 0 || b.y >= canvas.height);
-
         if (!hitSolid) {
             for (let p of platforms) {
-                if (b.x >= p.x && b.x <= p.x + p.width && b.y >= p.y && b.y <= p.y + p.height) {
-                    hitSolid = true;
-                    break;
-                }
+                if (b.x >= p.x && b.x <= p.x + p.width && b.y >= p.y && b.y <= p.y + p.height) { hitSolid = true; break; }
             }
         }
-
         if (hitSolid) {
             if (b.type === 'explosive') createExplosion(b.x, b.y, 65, 30);
             else if (b.type === 'geyser') createGeyser(b.x, b.y);
             else createParticles(b.x, b.y, b.color, 4);
-            bullets.splice(i, 1);
-            continue;
+            bullets.splice(i, 1); continue;
         }
 
         if (b.owner !== player1 && !roundOver) {
-            const dist = Math.hypot(b.x - player1.x, b.y - player1.y);
-            if (dist < b.radius + player1.radius) {
-                playSound('hit');
-                createParticles(player1.x, player1.y, '#3a86ff', 8);
-                if (b.type === 'explosive') createExplosion(b.x, b.y, 65, 30);
-                else player1.hp -= 15;
-                
-                bullets.splice(i, 1);
-                updateUI();
-                if (player1.hp <= 0) triggerDeath(player2);
-                continue;
+            if (Math.hypot(b.x - player1.x, b.y - player1.y) < b.radius + player1.radius) {
+                playSound('hit'); createParticles(player1.x, player1.y, '#3a86ff', 8);
+                if (b.type === 'explosive') createExplosion(b.x, b.y, 65, 30); else player1.hp -= 15;
+                bullets.splice(i, 1); updateUI();
+                if (player1.hp <= 0) triggerDeath(player2); continue;
             }
         }
-
         if (b.owner !== player2 && !roundOver) {
-            const dist = Math.hypot(b.x - player2.x, b.y - player2.y);
-            if (dist < b.radius + player2.radius) {
-                playSound('hit');
-                createParticles(player2.x, player2.y, '#ff0055', 8);
+            if (Math.hypot(b.x - player2.x, b.y - player2.y) < b.radius + player2.radius) {
+                playSound('hit'); createParticles(player2.x, player2.y, '#ff0055', 8);
                 if (b.type === 'explosive') createExplosion(b.x, b.y, 65, 30);
                 else if (b.type === 'geyser') player2.hp -= 100;
                 else player2.hp -= 15;
-
-                bullets.splice(i, 1);
-                updateUI();
-                if (player2.hp <= 0) triggerDeath(player1);
-                continue;
+                bullets.splice(i, 1); updateUI();
+                if (player2.hp <= 0) triggerDeath(player1); continue;
             }
         }
-    }
-
-    for (let i = explosions.length - 1; i >= 0; i--) {
-        const ex = explosions[i];
-        ex.currentRadius += 4;
-
-        if (ex.active && !roundOver) {
-            const distP1 = Math.hypot(ex.x - player1.x, ex.y - player1.y);
-            if (distP1 < ex.maxRadius + player1.radius) player1.hp -= ex.damage;
-
-            const distP2 = Math.hypot(ex.x - player2.x, ex.y - player2.y);
-            if (distP2 < ex.maxRadius + player2.radius) player2.hp -= ex.damage;
-
-            ex.active = false;
-            updateUI();
-            
-            if (player1.hp <= 0) { triggerDeath(player2); break; }
-            if (player2.hp <= 0) { triggerDeath(player1); break; }
-        }
-
-        if (ex.currentRadius >= ex.maxRadius) explosions.splice(i, 1);
-    }
-
-    for (let i = geysers.length - 1; i >= 0; i--) {
-        const g = geysers[i];
-        g.duration--;
-
-        if (!g.used && !roundOver) {
-            if (player2.x + player2.radius > g.x - g.width / 2 &&
-                player2.x - player2.radius < g.x + g.width / 2 &&
-                player2.y + player2.radius >= canvas.height - 40) {
-                
-                player2.hp -= 100;
-                g.used = true;
-                playSound('hit');
-                createParticles(player2.x, player2.y, '#00ffff', 16);
-                updateUI();
-                if (player2.hp <= 0) { triggerDeath(player1); break; }
-            }
-        }
-
-        if (g.duration <= 0) geysers.splice(i, 1);
     }
 }
 
 function drawEntity(ent) {
     ctx.fillStyle = ent.color;
-    ctx.beginPath();
-    ctx.arc(ent.x, ent.y, ent.radius, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.save();
-    ctx.translate(ent.x, ent.y);
-    ctx.rotate(ent.pistolAngle);
-    ctx.fillStyle = '#ffbe0b';
-    ctx.fillRect(0, -3, ent.pistolLength, 6);
-    ctx.restore();
+    ctx.beginPath(); ctx.arc(ent.x, ent.y, ent.radius, 0, Math.PI * 2); ctx.fill();
+    ctx.save(); ctx.translate(ent.x, ent.y); ctx.rotate(ent.pistolAngle);
+    ctx.fillStyle = '#ffbe0b'; ctx.fillRect(0, -3, ent.pistolLength, 6); ctx.restore();
 }
 
 function draw() {
     ctx.save();
-    if (shakeTime > 0) {
-        const offsetX = (Math.random() - 0.5) * shakeTime;
-        const offsetY = (Math.random() - 0.5) * shakeTime;
-        ctx.translate(offsetX, offsetY);
-    }
-
-    ctx.fillStyle = '#0f0f17';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (shakeTime > 0) { ctx.translate((Math.random() - 0.5) * shakeTime, (Math.random() - 0.5) * shakeTime); }
+    ctx.fillStyle = '#0f0f17'; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     platforms.forEach(p => {
-        if (p.type === 'floor') {
-            ctx.fillStyle = '#2a2a3c';
-            ctx.fillRect(p.x, p.y, p.width, p.height);
-        } else {
-            ctx.fillStyle = '#3e3e56';
-            ctx.fillRect(p.x, p.y, p.width, p.height);
-            ctx.strokeStyle = '#00e5ff';
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(p.x, p.y, p.width, p.height);
-        }
-    });
-
-    spikes.forEach(s => {
-        ctx.fillStyle = '#ff4757';
-        ctx.beginPath();
-        ctx.moveTo(s.x - s.width / 2, canvas.height - 40);
-        ctx.lineTo(s.x, canvas.height - 40 - s.height);
-        ctx.lineTo(s.x + s.width / 2, canvas.height - 40);
-        ctx.closePath();
-        ctx.fill();
-    });
-
-    geysers.forEach(g => {
-        ctx.fillStyle = '#111118';
-        ctx.fillRect(g.x - g.width / 2, canvas.height - 40, g.width, 40);
-
-        ctx.fillStyle = '#00e5ff';
-        const waterHeight = 25 + Math.sin(Date.now() / 100) * 4;
-        ctx.fillRect(g.x - g.width / 2 + 4, canvas.height - waterHeight, g.width - 8, waterHeight);
-
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-        ctx.fillRect(g.x - 15 + Math.random() * 30, canvas.height - waterHeight - Math.random() * 20, 6, 6);
+        ctx.fillStyle = p.type === 'floor' ? '#2a2a3c' : '#3e3e56';
+        ctx.fillRect(p.x, p.y, p.width, p.height);
+        if (p.type !== 'floor') { ctx.strokeStyle = '#00e5ff'; ctx.lineWidth = 1.5; ctx.strokeRect(p.x, p.y, p.width, p.height); }
     });
 
     particles.forEach(p => {
-        ctx.save();
-        ctx.globalAlpha = p.alpha;
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
+        ctx.save(); ctx.globalAlpha = p.alpha; ctx.fillStyle = p.color;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.fill(); ctx.restore();
     });
 
     bullets.forEach(b => {
-        ctx.fillStyle = b.color;
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-        ctx.fill();
-    });
-
-    explosions.forEach(ex => {
-        ctx.fillStyle = 'rgba(255, 100, 0, 0.4)';
-        ctx.beginPath();
-        ctx.arc(ex.x, ex.y, ex.currentRadius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = '#ffbe0b';
-        ctx.stroke();
+        ctx.fillStyle = b.color; ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2); ctx.fill();
     });
 
     drawEntity(player1);
@@ -1244,12 +764,7 @@ function draw() {
     ctx.restore();
 }
 
-function gameLoop() {
-    update();
-    draw();
-    requestAnimationFrame(gameLoop);
-}
-
+function gameLoop() { update(); draw(); requestAnimationFrame(gameLoop); }
 gameLoop();
 </script>
 </body>
