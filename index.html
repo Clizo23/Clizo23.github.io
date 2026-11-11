@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ball Pistol Game - Multimode Arena</title>
+    <title>Ball Pistol Game - First to 15</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -112,9 +112,9 @@
     <canvas id="gameCanvas" width="900" height="500"></canvas>
     
     <div id="start-screen">
-        <h1>BALL PISTOL DUEL</h1>
-        <div style="color: #aaa; font-size: 14px;">SELECT PLAY MODE</div>
-        <div class="mode-options">
+        <h1 id="screen-title">BALL PISTOL DUEL</h1>
+        <div style="color: #aaa; font-size: 14px;" id="screen-subtitle">FIRST TO 15 WINS</div>
+        <div class="mode-options" id="main-menu-options">
             <button class="mode-btn selected" data-mode="bot">VS BOT</button>
             <button class="mode-btn" data-mode="local">LOCAL 2P (SAME KEYBOARD)</button>
             <button class="mode-btn" data-mode="ws">ONLINE MATCHMAKING</button>
@@ -198,9 +198,11 @@ let gameRunning = false;
 let playMode = 'bot';
 let selectedDifficulty = 'easy';
 let roundOver = false;
+let matchOver = false;
 
 let socket = null;
-let myRole = null; // 1 or 2
+let myRole = null;
+let currentMapId = 0;
 
 const ROUND_TIME_LIMIT = 240;
 let roundTimer = ROUND_TIME_LIMIT;
@@ -274,16 +276,22 @@ function createParticles(x, y, color, count = 8) {
 
 function triggerScreenShake(amount = 10) { shakeTime = amount; }
 
-function generateRandomMap() {
+function loadMap(mapId) {
     platforms = [];
     platforms.push({ x: 0, y: canvas.height - 40, width: canvas.width, height: 40, type: 'floor' });
-    const numPlatforms = Math.floor(Math.random() * 3) + 3;
-    for (let i = 0; i < numPlatforms; i++) {
-        const pWidth = Math.floor(Math.random() * 80) + 100;
-        const pHeight = 18;
-        const pX = Math.random() * (canvas.width - pWidth - 100) + 50;
-        const pY = Math.random() * 200 + 150;
-        platforms.push({ x: pX, y: pY, width: pWidth, height: pHeight, type: 'platform' });
+
+    if (mapId === 1) {
+        platforms.push({ x: 120, y: 300, width: 90, height: 18, type: 'platform' });
+        platforms.push({ x: 380, y: 350, width: 120, height: 18, type: 'platform' });
+        platforms.push({ x: 620, y: 280, width: 130, height: 18, type: 'platform' });
+    } else if (mapId === 2) {
+        platforms.push({ x: 140, y: 190, width: 200, height: 18, type: 'platform' });
+        platforms.push({ x: 320, y: 190, width: 18, height: 110, type: 'platform' });
+        platforms.push({ x: 140, y: 330, width: 220, height: 18, type: 'platform' });
+
+        platforms.push({ x: 620, y: 190, width: 200, height: 18, type: 'platform' });
+        platforms.push({ x: 620, y: 190, width: 18, height: 110, type: 'platform' });
+        platforms.push({ x: 540, y: 330, width: 220, height: 18, type: 'platform' });
     }
 }
 
@@ -333,6 +341,7 @@ document.getElementById('play-btn').addEventListener('click', () => {
     if (playMode === 'ws') {
         initMatchmaking();
     } else {
+        currentMapId = Math.floor(Math.random() * 3);
         startMatch();
     }
 });
@@ -353,10 +362,15 @@ function initMatchmaking() {
             if (data.type === 'waiting') {
                 statusText.innerText = "Waiting for another player to join...";
             } else if (data.type === 'assign') {
-                myRole = data.role; // 1 or 2
+                myRole = data.role;
+                currentMapId = data.map;
                 startMatch();
+            } else if (data.type === 'new_round') {
+                currentMapId = data.map;
+                resetRound();
+            } else if (data.type === 'match_over') {
+                showVictoryScreen(data.winner === myRole ? "YOU WIN THE MATCH!" : "YOU LOSE THE MATCH!");
             } else if (data.type === 'input') {
-                // Sync remote player state
                 const remote = myRole === 1 ? player2 : player1;
                 remote.x = data.x;
                 remote.y = data.y;
@@ -365,13 +379,9 @@ function initMatchmaking() {
                 remote.pistolAngle = data.angle;
                 remote.hp = data.hp;
             } else if (data.type === 'action') {
-                if (data.action === 'shoot') {
-                    const remote = myRole === 1 ? player2 : player1;
-                    spawnBullet(remote, data.angle, data.bType);
-                } else if (data.action === 'ability') {
-                    const remote = myRole === 1 ? player2 : player1;
-                    activateAbility(remote, data.abilityName);
-                }
+                const remote = myRole === 1 ? player2 : player1;
+                if (data.action === 'shoot') spawnBullet(remote, data.angle, data.bType);
+                else if (data.action === 'ability') activateAbility(remote, data.abilityName);
             } else if (data.type === 'opponent_disconnected') {
                 alert("Opponent disconnected!");
                 location.reload();
@@ -380,6 +390,7 @@ function initMatchmaking() {
         socket.onerror = () => {
             alert("Matchmaking connection failed! Falling back to Bot Mode.");
             playMode = 'bot';
+            currentMapId = 0;
             startMatch();
         };
     } catch (e) {
@@ -389,6 +400,9 @@ function initMatchmaking() {
 
 function startMatch() {
     document.getElementById('start-screen').style.display = 'none';
+    matchOver = false;
+    p1Score = 0;
+    p2Score = 0;
     
     if (playMode === 'bot') {
         document.getElementById('p2-label').innerText = `BOT [${selectedDifficulty.toUpperCase()}]`;
@@ -401,18 +415,26 @@ function startMatch() {
     }
 
     gameRunning = true;
-    p1Score = 0;
-    p2Score = 0;
     resetRound();
 }
 
+function showVictoryScreen(msg) {
+    gameRunning = false;
+    matchOver = true;
+    document.getElementById('screen-title').innerText = msg;
+    document.getElementById('screen-subtitle').innerText = `Final Score: ${p1Score} - ${p2Score}`;
+    document.getElementById('main-menu-options').style.display = 'flex';
+    document.getElementById('play-btn').innerText = 'PLAY AGAIN';
+    document.getElementById('start-screen').style.display = 'flex';
+    if (socket) { socket.close(); socket = null; }
+}
+
 window.addEventListener('keydown', (e) => {
-    if (!gameRunning || roundOver) return;
+    if (!gameRunning || roundOver || matchOver) return;
     const key = e.key.toLowerCase();
     keys[key] = true;
 
     const me = (playMode === 'ws' && myRole === 2) ? player2 : player1;
-    const myCdMap = (me === player1) ? p1Cooldowns : p2Cooldowns;
     const myAbilityIdx = (me === player1) ? p1AbilityIdx : p2AbilityIdx;
 
     if (key === 'f') {
@@ -455,7 +477,7 @@ canvas.addEventListener('mousemove', (e) => {
 });
 
 canvas.addEventListener('mousedown', () => {
-    if (!gameRunning || roundOver) return;
+    if (!gameRunning || roundOver || matchOver) return;
     const me = (playMode === 'ws' && myRole === 2) ? player2 : player1;
     if (Date.now() - me.lastShoot > 180) {
         shoot(me);
@@ -561,7 +583,7 @@ function createGeyser(x, y) {
 }
 
 function resetRound() {
-    generateRandomMap();
+    loadMap(currentMapId);
     player1.x = 150; player1.y = 200; player1.vx = 0; player1.vy = 0; player1.hp = player1.maxHp;
     player2.x = 750; player2.y = 200; player2.vx = 0; player2.vy = 0; player2.hp = player2.maxHp;
     bullets.length = 0; explosions.length = 0; geysers.length = 0; spikes.length = 0; particles.length = 0;
@@ -572,15 +594,36 @@ function resetRound() {
 }
 
 function triggerDeath(winner) {
-    if (roundOver) return;
+    if (roundOver || matchOver) return;
     roundOver = true;
+    
     if (winner === player1) p1Score++; else p2Score++;
     updateUI();
-    setTimeout(() => { resetRound(); }, 1200);
+
+    // Check First to 15 Win Condition
+    if (p1Score >= 15 || p2Score >= 15) {
+        const winningPlayerNum = p1Score >= 15 ? 1 : 2;
+        if (playMode === 'ws') {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ type: 'match_over', winner: winningPlayerNum }));
+            }
+        }
+        showVictoryScreen(winningPlayerNum === 1 ? "PLAYER 1 WINS THE MATCH!" : "PLAYER 2 WINS THE MATCH!");
+        return;
+    }
+    
+    setTimeout(() => {
+        if (playMode === 'ws' && myRole === 1) {
+            socket.send(JSON.stringify({ type: 'next_round' }));
+        } else if (playMode !== 'ws') {
+            currentMapId = Math.floor(Math.random() * 3);
+            resetRound();
+        }
+    }, 1200);
 }
 
 function updateRoundTimer() {
-    if (roundOver) return;
+    if (roundOver || matchOver) return;
     const now = Date.now();
     if (now - lastTimerTick >= 1000) {
         roundTimer--;
@@ -593,7 +636,7 @@ function updateRoundTimer() {
 }
 
 function handleInput() {
-    if (roundOver) return;
+    if (roundOver || matchOver) return;
 
     if (playMode === 'ws') {
         const me = (myRole === 2) ? player2 : player1;
@@ -615,7 +658,6 @@ function handleInput() {
             }));
         }
     } else {
-        // Local/Bot input handling
         if (keys['a']) player1.vx = -player1.speed;
         else if (keys['d']) player1.vx = player1.speed;
         else player1.vx *= 0.85;
@@ -640,10 +682,9 @@ function handleInput() {
 }
 
 function updateBotAI() {
-    if (roundOver) return;
+    if (roundOver || matchOver) return;
     const dx = player1.x - player2.x;
     const dy = player1.y - player2.y;
-    const dist = Math.hypot(dx, dy);
     player2.pistolAngle = Math.atan2(dy, dx);
     if (Math.abs(dx) > 250) player2.vx = dx > 0 ? player2.speed : -player2.speed;
     else if (Math.abs(dx) < 120) player2.vx = dx > 0 ? -player2.speed : player2.speed;
@@ -681,7 +722,7 @@ function applyPhysics(ent) {
 }
 
 function update() {
-    if (!gameRunning) return;
+    if (!gameRunning || matchOver) return;
     updateRoundTimer();
     handleInput();
     applyPhysics(player1);
